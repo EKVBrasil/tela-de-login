@@ -2,6 +2,7 @@
 const express = require("express");
 const bcrypt = require("bcrypt");
 const db = require("./database");
+const cors = require('cors');  // Importa o middleware CORS
 const app = express();
 const { validaCamposRequisicao, compararHashSenha } = require("./utils");
 
@@ -10,6 +11,8 @@ const PORT = 3000;
 
 // Middleware para processar JSON
 app.use(express.json());
+app.use(cors());  
+
 
 // Iniciando o servidor
 app.listen(PORT, async () => {
@@ -27,9 +30,9 @@ app.post("/sign-in", async (req, res) => {
    validaCamposRequisicao(body, res);
    // const resultado = usuarioExiste(body)
    if (await usuarioExiste(body)) {
-      res.status(200).send("Passou!!!");
+      return res.status(200).send(true);
    }
-   res.status(401).send("Não passou!!!");
+   return res.status(401).send("Não passou!!!");
 });
 
 async function usuarioExiste(body) {
