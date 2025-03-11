@@ -6,7 +6,7 @@ const app = express();
 
 // Definindo a porta do servidor
 const PORT = 3000;
-const usuarios = [];
+
 
 // Middleware para processar JSON
 app.use(express.json());
@@ -25,21 +25,20 @@ app.listen(PORT, () => {
 app.post('/sign-in', async(req, res) => {
     const body = req.body;
     validaCamposRequisicao(body, res);
-    // const resultado = estaNaLista(body)
-    if (await estaNaLista(body)) {
+    // const resultado = usuarioExiste(body)
+    if (await usuarioExiste(body)) {
         res.status(200).send('Passou!!!');
     }
     res.status(401).send('Não passou!!!')
 });
 
-async function estaNaLista(body) {
-    for (let i = 0; i < usuarios.length; i++) {
-        const usuario = usuarios[i];
-        if (usuario.nome === body.nome && await compararHashSenha(usuario.senha, body.senha)) {
-            return true;
-        }
-    }
-    return false;
+async function usuarioExiste(body) {
+   const usuario = await db.query(
+        "SELECT * FROM usuarios WHERE nome = $1",
+        [body.nome]
+      );
+      const match = await bcrypt.compare(body.senha, usuario.senha);
+      return match;
 }
  async function compararHashSenha(hash, senha) {
     const match = await bcrypt.compare(senha, hash);
