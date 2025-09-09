@@ -22,20 +22,20 @@ app.listen(PORT, async () => {
    }
 });
 
-app.post("/sign-in", async (req, res) => {
+app.post("/api/auth/login", async (req, res) => {
    const body = req.body;
    validaCamposRequisicao(body, res);
    // const resultado = usuarioExiste(body)
    if (await usuarioExiste(body)) {
-      res.status(200).send("Passou!!!");
+      res.status(200).send("Passou!");
    }
-   res.status(401).send("Não passou!!!");
+   res.status(401).send("Não passou!");
 });
 
 async function usuarioExiste(body) {
    try {
-      const usuario = await db.query("SELECT * FROM usuarios WHERE nome = $1", [
-         body.nome,
+      const usuario = await db.query("SELECT * FROM usuarios WHERE email = $1", [
+         body.email,
       ]);
       const match = await bcrypt.compare(body.senha, usuario.rows[0].senha);
       return match;
@@ -44,15 +44,16 @@ async function usuarioExiste(body) {
    }
 }
 
-app.post("/sign-up", (req, res) => {
+app.post("/api/auth/register", (req, res) => {
    const body = req.body;
    const saltRounds = 10;
    validaCamposRequisicao(body, res);
    bcrypt.hash(body.senha, saltRounds, async function (err, hash) {
       body.senha = hash;
       try {
-         await db.query("INSERT INTO usuarios (nome, senha) VALUES ($1, $2);", [
+         await db.query("INSERT INTO usuarios (nome, email, senha) VALUES ($1, $2, $3);", [
             body.nome,
+            body.email,
             body.senha,
          ]);
          return res.status(201).send("Usuário registrado com sucesso!");
