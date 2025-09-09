@@ -5,6 +5,9 @@ function validaCamposRequisicao(body, res) {
    if (body.senha == "" || body.senha == undefined) {
       return res.status(422).send("Senha Inválida.");
    }
+   if (body.email == "" || body.email == undefined) {
+      return res.status(422).send("Email Inválido.");
+   }
    if (body.senha.length > 20 || body.nome.length > 35) {
       return res
          .status(422)
